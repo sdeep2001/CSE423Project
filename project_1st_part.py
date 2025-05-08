@@ -106,7 +106,6 @@ def check_sphere_collision(pos1, radius1, pos2, radius2):
     dist = distance_3d(pos1, pos2)
     return dist < (radius1 + radius2)
 
-
 # --- Game Object Initialization and Management ---
 def init_player():
     global player
@@ -121,30 +120,33 @@ def init_player():
     }
 
 def get_enemy_definition(enemy_type_id):
+    # Define colors based on current level theme
     if current_level <= 3:
-        type1_color = [0.3, 0.7, 0.3]
-        type2_color = [0.2, 0.5, 0.2]
-        type3_color = [0.1, 0.4, 0.1]
+        # Green/Grass theme
+        type1_color = [0.3, 0.7, 0.3]  # Light green
+        type2_color = [0.2, 0.5, 0.2]  # Medium green
+        type3_color = [0.1, 0.4, 0.1]  # Dark green
     elif current_level <= 6:
-        type1_color = [0.8, 0.6, 0.4]
-        type2_color = [0.6, 0.4, 0.2]
-        type3_color = [0.5, 0.3, 0.1]
+        # Brown/Sand theme
+        type1_color = [0.8, 0.6, 0.4]  # Light sand
+        type2_color = [0.6, 0.4, 0.2]  # Medium sand
+        type3_color = [0.5, 0.3, 0.1]  # Dark sand
     elif current_level <= 9:
         # Blue/Ice theme
-        type1_color = [0.6, 0.8, 0.9]
-        type2_color = [0.4, 0.6, 0.8]
-        type3_color = [0.2, 0.4, 0.7]
+        type1_color = [0.6, 0.8, 0.9]  # Light ice blue
+        type2_color = [0.4, 0.6, 0.8]  # Medium ice blue
+        type3_color = [0.2, 0.4, 0.7]  # Dark ice blue
     else:
         # Red/Lava theme
-        type1_color = [0.9, 0.4, 0.3]
-        type2_color = [0.8, 0.3, 0.2]
-        type3_color = [0.7, 0.2, 0.1]
+        type1_color = [0.9, 0.4, 0.3]  # Light lava red
+        type2_color = [0.8, 0.3, 0.2]  # Medium lava red
+        type3_color = [0.7, 0.2, 0.1]  # Dark lava red
 
     if enemy_type_id == 1:
         return {
             'name': 'Type1Wolf',
-            'health': 3,
-            'damage': 3,
+            'health': 1,
+            'damage': 1,
             'speed_mult': 0.2,
             'model_height': 2.0,
             'color': type1_color,
@@ -153,8 +155,8 @@ def get_enemy_definition(enemy_type_id):
     elif enemy_type_id == 2:
         return {
             'name': 'Type2Wolf',
-            'health': 4,
-            'damage': 4,
+            'health': 2,
+            'damage': 2,
             'speed_mult': 0.4,
             'model_height': 3.0,
             'color': type2_color,
@@ -163,8 +165,8 @@ def get_enemy_definition(enemy_type_id):
     elif enemy_type_id == 3:
         return {
             'name': 'Type3Wolf',
-            'health': 5,
-            'damage': 5,
+            'health': 3,
+            'damage': 3,
             'speed_mult': 0.6,
             'model_height': 4.0,
             'color': type3_color,
@@ -173,22 +175,22 @@ def get_enemy_definition(enemy_type_id):
     elif enemy_type_id == 'miniboss':
         return {
             'name': 'MiniBossWolf',
-            'health': 8,
+            'health': 4,
             'damage': 4,
             'speed_mult': 0.8,
             'model_height': 6.0,
-            'color': [0.8, 0.2, 0.2],
+            'color': [0.8, 0.2, 0.2],  # Bright red color for miniboss
             'points': 50,
             'is_boss': True
         }
     elif enemy_type_id == 'boss':
         return {
             'name': 'BossWolf',
-            'health': 15,
-            'damage': 7,
+            'health': 5,
+            'damage': 5,
             'speed_mult': 1.0,
             'model_height': 8.0,
-            'color': [0.9, 0.1, 0.1],
+            'color': [0.9, 0.1, 0.1],  # Deep red color for final boss
             'points': 100,
             'is_boss': True
         }
@@ -358,32 +360,7 @@ def update_player(delta_time):
             tp_camera_yaw_offset+=PLAYER_ROTATE_ANGLE
     if player['shoot_cooldown']>0: 
         player['shoot_cooldown']-=delta_time
-    if mouse_buttons.get(GLUT_LEFT_BUTTON)==GLUT_DOWN and player['shoot_cooldown']<=0:
-        player['shoot_cooldown'] = player['current_shoot_cooldown_time']
-        
-        yaw_rad = math.radians(player['rotation_y'])
-
-        gun_base_offset = 0.35 * PLAYER_TOTAL_HEIGHT
-        gun_length = PLAYER_GUN_LENGTH
-        shoulder_height = PLAYER_LEG_LENGTH + PLAYER_TORSO_HEIGHT * 0.8
-        gun_y = player['pos'][1] - PLAYER_BODY_Y_OFFSET + shoulder_height
-
-        dir_x = math.sin(yaw_rad)
-        dir_z = math.cos(yaw_rad)
-
-        gun_base_x = player['pos'][0] + dir_x * gun_base_offset
-        gun_base_z = player['pos'][2] + dir_z * gun_base_offset
-
-        tip_world_x = gun_base_x + dir_x * gun_length
-        tip_world_y = gun_y
-        tip_world_z = gun_base_z + dir_z * gun_length
-
-        direction = normalize_vector([dir_x, 0, dir_z])
-
-        create_bullet([tip_world_x, tip_world_y, tip_world_z], direction, 'PLAYER', 1)
-        mouse_buttons[GLUT_LEFT_BUTTON] = "PROCESSED"
-
-
+    
 def update_enemies(delta_time):
     global player,game_state
     level_conf=level_configs[current_level]
@@ -407,6 +384,7 @@ def update_enemies(delta_time):
             enemy['shoot_cooldown']=enemy['reload_time']
             player_center_y = player['pos'][1] - PLAYER_BODY_Y_OFFSET + PLAYER_TOTAL_HEIGHT/2
             target_pos=[player['pos'][0],player_center_y,player['pos'][2]]
+            
             enemy_face_center_y = enemy['pos'][1]
             gun_len_for_offset = 0.2 * enemy['model_height']
             s_yaw_e=math.sin(math.radians(enemy['rotation_y']))
@@ -438,7 +416,6 @@ def update_bullets(delta_time):
             
         if bullet['owner'] == 'PLAYER':
             for enemy in list(enemies):
-
                 bullet_to_enemy = [
                     enemy['pos'][0] - bullet['pos'][0],
                     enemy['pos'][1] - bullet['pos'][1],
@@ -456,7 +433,6 @@ def update_bullets(delta_time):
                     break
                     
         elif bullet['owner'] == 'ENEMY':
-
             bullet_to_player = [
                 player['pos'][0] - bullet['pos'][0],
                 (player['pos'][1] - PLAYER_BODY_Y_OFFSET + PLAYER_TOTAL_HEIGHT/2) - bullet['pos'][1],
@@ -530,15 +506,539 @@ def update_perks():
     """Update perk availability based on enemy kills"""
     global player
     
+    # Track kills for each perk type
     player['kills_for_health_perk'] += 1
     player['kills_for_score_perk'] += 1
     player['kills_for_gun_perk'] += 1
     
+    # Health perk becomes available every 5 kills
     if player['kills_for_health_perk'] >= 3:
         player['health_perk_available'] = True
     
+    # Score multiplier perk becomes available every 3 kills
     if player['kills_for_score_perk'] >= 4:
         player['score_perk_available'] = True
     
+    # Rapid fire perk becomes available every 4 kills
     if player['kills_for_gun_perk'] >= 5:
         player['gun_perk_available'] = True
+
+# --- Drawing Functions ---
+def draw_text(x,y,text,r=1,g=1,b=1,font=GLUT_BITMAP_HELVETICA_18): 
+    glColor3f(r,g,b)
+    glRasterPos2f(x,y)
+    [glutBitmapCharacter(font,ord(c)) for c in text]
+
+def draw_cylinder(base_r,top_r,height,slices,stacks,color):
+    global glu_quadric
+    glColor3fv(color)
+    glPushMatrix()
+
+    glRotatef(-90,1,0,0) 
+    gluCylinder(glu_quadric,base_r,top_r,height,slices,stacks)
+    gluDisk(glu_quadric,0,base_r,slices,1)
+    glTranslatef(0,0,height)
+    gluDisk(glu_quadric,0,top_r,slices,1)
+    glPopMatrix()
+
+def draw_tapered_cylinder(base_radius, top_radius, height, color):
+    global glu_quadric
+    glColor3fv(color)
+    glPushMatrix()
+    glRotatef(-90, 1, 0, 0)
+    gluCylinder(glu_quadric, base_radius, top_radius, height, 20, 8)
+    # Base cap
+    gluDisk(glu_quadric, 0, base_radius, 20, 8)
+    # Top cap
+    glTranslatef(0, 0, height)
+    gluDisk(glu_quadric, 0, top_radius, 20, 8)
+    glPopMatrix()
+
+def draw_player():
+    glPushMatrix()
+    
+    # Scale everything relative to PLAYER_TOTAL_HEIGHT
+    model_scale = PLAYER_TOTAL_HEIGHT
+    
+    # Body positioning constants
+    torso_height = 0.45 * model_scale
+    head_radius = 0.15 * model_scale
+    
+    # Body (centered at origin)
+    glPushMatrix()
+    glTranslatef(0, PLAYER_LEG_LENGTH + torso_height/2, 0)
+    glColor3f(0.5, 0.5, 0.0)
+    glScalef(0.3 * model_scale, torso_height, 0.25 * model_scale)
+    glutSolidCube(1.0)
+    glPopMatrix()
+
+    # Head (directly above body)
+    glPushMatrix()
+    glTranslatef(0, PLAYER_LEG_LENGTH + torso_height + head_radius, 0)
+    glColor3f(0.8, 0.6, 0.4)
+    glutSolidSphere(head_radius, 20, 20)
+    glPopMatrix()
+
+    # Arms (at shoulder height - moved forward)
+    shoulder_height = PLAYER_LEG_LENGTH + torso_height * 0.8
+    
+    # Left arm - moved forward
+    glPushMatrix()
+    glTranslatef(-0.15 * model_scale, shoulder_height, 0.15 * model_scale)
+    glRotatef(15, 0, 1, 0)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0.05 * model_scale, 0.04 * model_scale, PLAYER_ARM_LENGTH * 0.7, 8, 1, (0.8, 0.6, 0.4))
+    glPopMatrix()
+
+    # Right arm - moved forward
+    glPushMatrix()
+    glTranslatef(0.15 * model_scale, shoulder_height, 0.15 * model_scale)
+    glRotatef(-15, 0, 1, 0)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0.05 * model_scale, 0.04 * model_scale, PLAYER_ARM_LENGTH * 0.7, 8, 1, (0.8, 0.6, 0.4))
+    glPopMatrix()
+
+    # Gun (centered between arms and moved forward)
+    glPushMatrix()
+    glTranslatef(0, shoulder_height, 0.35 * model_scale)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(0.05 * model_scale, 0.03 * model_scale, PLAYER_GUN_LENGTH, 8, 1, (0.3, 0.3, 0.3))
+    glPopMatrix()
+
+    # Legs (starting from bottom of body)
+    leg_start_height = PLAYER_LEG_LENGTH
+    
+    # Left leg
+    glPushMatrix()
+    glTranslatef(-0.1 * model_scale, leg_start_height, 0)
+    glRotatef(180, 1, 0, 0)
+    draw_cylinder(0.06 * model_scale, 0.05 * model_scale, PLAYER_LEG_LENGTH, 8, 1, (0.3, 0.3, 0.8))
+    glPopMatrix()
+
+    # Right leg
+    glPushMatrix()
+    glTranslatef(0.1 * model_scale, leg_start_height, 0)
+    glRotatef(180, 1, 0, 0)
+    draw_cylinder(0.06 * model_scale, 0.05 * model_scale, PLAYER_LEG_LENGTH, 8, 1, (0.3, 0.3, 0.8))
+    glPopMatrix()
+
+    glPopMatrix()
+
+def draw_wolf(total_h, body_c, leg_c, face_c, gun_c):
+
+    body_width = total_h * 0.35
+    body_height = total_h * 0.35
+    body_depth = total_h * 0.7
+    face_size = total_h * 0.25
+    leg_len = total_h * 0.4
+    leg_r = total_h * 0.04
+    gun_len = total_h * 0.3
+    gun_r = total_h * 0.04
+
+    darkened_body_c = [c * 0.7 for c in body_c]
+    darkened_face_c = [c * 0.7 for c in face_c]
+    black_legs_c = [0.1, 0.1, 0.1]
+
+    # Body positioning
+    body_center_y = leg_len + body_height/2
+
+    # Body
+    glPushMatrix()
+    glTranslatef(0, body_center_y, 0)
+    glColor3fv(darkened_body_c)
+    glScalef(body_width, body_height, body_depth)
+    glutSolidCube(1.0)
+    glPopMatrix()
+
+    # Face
+    face_center_y = body_center_y
+    face_center_z = body_depth/2 + face_size/4
+    glPushMatrix()
+    glTranslatef(0, face_center_y, face_center_z)
+    glColor3fv(darkened_face_c)
+    glScalef(face_size, face_size, face_size * 0.5)
+    glutSolidCube(1.0)
+    glPopMatrix()
+
+    # Gun
+    gun_start_y = face_center_y
+    gun_start_z = face_center_z + face_size/4
+    glPushMatrix()
+    glTranslatef(0, gun_start_y, gun_start_z)
+    glRotatef(90, 1, 0, 0)
+    draw_cylinder(gun_r, gun_r * 0.8, gun_len, 8, 1, gun_c)
+    glPopMatrix()
+
+    # Legs
+    leg_attach_y = body_center_y - body_height/2
+    front_leg_z = body_depth * 0.3
+    rear_leg_z = -body_depth * 0.3
+    leg_x = body_width * 0.4
+
+    # Front Right Leg
+    glPushMatrix()
+    glTranslatef(leg_x, leg_attach_y, front_leg_z)
+    glRotatef(180, 1, 0, 0)
+    draw_tapered_cylinder(leg_r, leg_r * 0.7, leg_len, black_legs_c)
+    glPopMatrix()
+
+    # Front Left Leg
+    glPushMatrix()
+    glTranslatef(-leg_x, leg_attach_y, front_leg_z)
+    glRotatef(180, 1, 0, 0)
+    draw_tapered_cylinder(leg_r, leg_r * 0.7, leg_len, black_legs_c)
+    glPopMatrix()
+
+    # Rear Right Leg
+    glPushMatrix()
+    glTranslatef(leg_x, leg_attach_y, rear_leg_z)
+    glRotatef(180, 1, 0, 0)
+    draw_tapered_cylinder(leg_r, leg_r * 0.7, leg_len, black_legs_c)
+    glPopMatrix()
+
+    # Rear Left Leg
+    glPushMatrix()
+    glTranslatef(-leg_x, leg_attach_y, rear_leg_z)
+    glRotatef(180, 1, 0, 0)
+    draw_tapered_cylinder(leg_r, leg_r * 0.7, leg_len, black_legs_c)
+    glPopMatrix()
+
+
+def draw_dungeon():
+    # Define color schemes based on level
+    if current_level <= 3:
+        # Green theme (levels 1-3)
+        tile_color1 = (0.4, 0.8, 0.4)  # Light green
+        tile_color2 = (0.2, 0.6, 0.2)  # Dark green
+        wall_color1 = (0.1, 0.3, 0.1)  # Darkest green
+        wall_color2 = (0.15, 0.35, 0.15)  # Slightly lighter dark green
+    elif current_level <= 6:
+        # Brown theme (levels 4-6)
+        tile_color1 = (0.8, 0.6, 0.4)  # Light brown
+        tile_color2 = (0.6, 0.4, 0.2)  # Dark brown
+        wall_color1 = (0.5, 0.2, 0.2)  # Maroon
+        wall_color2 = (0.55, 0.25, 0.25)  # Slightly lighter maroon
+    elif current_level <= 9:
+        # Blue theme (levels 7-9)
+        tile_color1 = (0.4, 0.6, 0.8)  # Light blue
+        tile_color2 = (0.2, 0.4, 0.6)  # Dark blue
+        wall_color1 = (0.1, 0.2, 0.4)  # Darkest blue
+        wall_color2 = (0.15, 0.25, 0.45)  # Slightly lighter dark blue
+    else:
+        # Red theme (level 10)
+        tile_color1 = (0.8, 0.4, 0.4)  # Light red
+        tile_color2 = (0.6, 0.2, 0.2)  # Dark red
+        wall_color1 = (0.8, 0.0, 0.8)  # Magenta
+        wall_color2 = (0.85, 0.1, 0.85)  # Slightly lighter magenta
+
+    # Floor with checkered pattern
+    glBegin(GL_QUADS)
+    glNormal3f(0, 1, 0)
+    for x in range(int(DUNGEON_SIZE_X/TILE_SIZE)):
+        for z in range(int(DUNGEON_SIZE_Z/TILE_SIZE)):
+            # Alternate between colors
+            if (x + z) % 2 == 0:
+                glColor3f(*tile_color1)
+            else:
+                glColor3f(*tile_color2)
+            
+            x1 = x * TILE_SIZE
+            x2 = (x + 1) * TILE_SIZE
+            z1 = z * TILE_SIZE
+            z2 = (z + 1) * TILE_SIZE
+            
+            glVertex3f(x1, 0, z1)
+            glVertex3f(x2, 0, z1)
+            glVertex3f(x2, 0, z2)
+            glVertex3f(x1, 0, z2)
+    glEnd()
+
+    # Walls with alternating pattern
+    wall_sections = 20  # Number of wall sections
+    section_length = DUNGEON_SIZE_X / wall_sections
+    
+    for i in range(wall_sections):
+        if i % 2 == 0:
+            glColor3f(*wall_color1)
+        else:
+            glColor3f(*wall_color2)
+            
+        # North wall
+        glBegin(GL_QUADS)
+        glNormal3f(0, 0, 1)
+        glVertex3f(i * section_length, 0, 0)
+        glVertex3f((i + 1) * section_length, 0, 0)
+        glVertex3f((i + 1) * section_length, WALL_HEIGHT, 0)
+        glVertex3f(i * section_length, WALL_HEIGHT, 0)
+        glEnd()
+        
+        # South wall
+        glBegin(GL_QUADS)
+        glNormal3f(0, 0, -1)
+        glVertex3f(i * section_length, 0, DUNGEON_SIZE_Z)
+        glVertex3f(i * section_length, WALL_HEIGHT, DUNGEON_SIZE_Z)
+        glVertex3f((i + 1) * section_length, WALL_HEIGHT, DUNGEON_SIZE_Z)
+        glVertex3f((i + 1) * section_length, 0, DUNGEON_SIZE_Z)
+        glEnd()
+        
+        # East and West walls
+        glBegin(GL_QUADS)
+        glNormal3f(1, 0, 0)
+        glVertex3f(0, 0, i * section_length)
+        glVertex3f(0, WALL_HEIGHT, i * section_length)
+        glVertex3f(0, WALL_HEIGHT, (i + 1) * section_length)
+        glVertex3f(0, 0, (i + 1) * section_length)
+        glEnd()
+        
+        glBegin(GL_QUADS)
+        glNormal3f(-1, 0, 0)
+        glVertex3f(DUNGEON_SIZE_X, 0, i * section_length)
+        glVertex3f(DUNGEON_SIZE_X, 0, (i + 1) * section_length)
+        glVertex3f(DUNGEON_SIZE_X, WALL_HEIGHT, (i + 1) * section_length)
+        glVertex3f(DUNGEON_SIZE_X, WALL_HEIGHT, i * section_length)
+        glEnd()
+
+def draw_ui():
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0,SCREEN_WIDTH,0,SCREEN_HEIGHT)
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    glDisable(GL_LIGHTING)
+    glDisable(GL_DEPTH_TEST)
+    draw_text(10,SCREEN_HEIGHT-30,f"Health: {player['health']}/{PLAYER_MAX_HEALTH}",1,0.2,0.2)
+    draw_text(10,SCREEN_HEIGHT-60,f"Score: {player['score']}",1,1,0.2)
+    draw_text(SCREEN_WIDTH-200,SCREEN_HEIGHT-30,f"Level: {current_level}",0.8,0.8,0.8)
+    perk_y=SCREEN_HEIGHT-90
+    if player['health_perk_available']: 
+        draw_text(10,perk_y,"Health Perk Ready!(H)",0,1,0)
+        perk_y-=25
+    if player['score_perk_available']:
+        draw_text(10,perk_y,"Score Perk Ready!(C)",1,1,0)
+        perk_y-=25
+    if player['gun_perk_available']: 
+        draw_text(10,perk_y,"Gun Perk Ready!(G)",1,0.5,0)
+        perk_y-=25
+    active_perk_y=SCREEN_HEIGHT-90
+    if player['score_perk_active_until']>0 and time.time()<player['score_perk_active_until']: 
+        rem=int(player['score_perk_active_until']-time.time())
+        draw_text(SCREEN_WIDTH-250,active_perk_y,f"Score x2: {rem}s",1,1,0)
+        active_perk_y-=25
+    if player['gun_perk_active_until']>0 and time.time()<player['gun_perk_active_until']: 
+        rem=int(player['gun_perk_active_until']-time.time())
+        draw_text(SCREEN_WIDTH-250,active_perk_y,f"Rapid Fire: {rem}s",1,0.5,0)
+        active_perk_y-=25
+    if game_state==STATE_YOU_WIN: 
+        draw_text(SCREEN_WIDTH/2-100,SCREEN_HEIGHT/2,"YOU WIN!",0.2,1,0.2,GLUT_BITMAP_TIMES_ROMAN_24)
+        draw_text(SCREEN_WIDTH/2-150,SCREEN_HEIGHT/2-30,f"Final Score: {player['score']}",1,1,0.2)
+    glEnable(GL_DEPTH_TEST)
+    glEnable(GL_LIGHTING)
+    glPopMatrix()
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
+    glMatrixMode(GL_MODELVIEW)
+
+# --- GLUT Callbacks ---
+def display():
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glLoadIdentity()
+    player_base_x,player_base_y,player_base_z = player['pos']
+    if camera_mode==CAMERA_MODE_FIRST_PERSON:
+        eye_x=player_base_x
+        eye_y=player_base_y-PLAYER_BODY_Y_OFFSET+PLAYER_EYE_HEIGHT_FROM_MODEL_BASE
+        eye_z=player_base_z
+        pitch_r=math.radians(player['rotation_x'])
+        yaw_r=math.radians(player['rotation_y'])
+        look_x=eye_x+math.sin(yaw_r)*math.cos(pitch_r)
+        look_y=eye_y-math.sin(pitch_r)
+        look_z=eye_z+math.cos(yaw_r)*math.cos(pitch_r)
+        gluLookAt(eye_x,eye_y,eye_z,look_x,look_y,look_z,0,1,0)
+    elif camera_mode==CAMERA_MODE_THIRD_PERSON:
+        target_foc_y = player_base_y - PLAYER_BODY_Y_OFFSET + PLAYER_TOTAL_HEIGHT/2
+        # Use only tp_camera_yaw_offset for camera rotation, not player rotation
+        cam_x_off = tp_camera_distance * math.cos(math.radians(tp_camera_pitch)) * math.sin(math.radians(tp_camera_yaw_offset))
+        cam_y_off = tp_camera_distance * math.sin(math.radians(-tp_camera_pitch))
+        cam_z_off = -tp_camera_distance * math.cos(math.radians(tp_camera_pitch)) * math.cos(math.radians(tp_camera_yaw_offset))
+        cam_x = player_base_x + cam_x_off
+        cam_y = target_foc_y + cam_y_off
+        cam_z = player_base_z + cam_z_off
+        gluLookAt(cam_x, cam_y, cam_z, player_base_x, target_foc_y, player_base_z, 0, 1, 0)
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    light_pos=[DUNGEON_SIZE_X/2,WALL_HEIGHT*1.8,DUNGEON_SIZE_Z/2,1.0]
+    glLightfv(GL_LIGHT0,GL_POSITION,light_pos)
+    glLightfv(GL_LIGHT0,GL_DIFFUSE,[0.9,0.9,0.8,1])
+    glLightfv(GL_LIGHT0,GL_AMBIENT,[0.35,0.35,0.35,1])
+    glEnable(GL_COLOR_MATERIAL)
+    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE)
+    draw_dungeon()
+    if camera_mode == CAMERA_MODE_THIRD_PERSON:
+        glPushMatrix()
+        glTranslatef(player['pos'][0], player['pos'][1] - PLAYER_BODY_Y_OFFSET, player['pos'][2])
+        glRotatef(player['rotation_y'], 0, 1, 0)
+        draw_player()
+        
+        # Calculate laser start position (gun tip)
+        yaw_rad = math.radians(player['rotation_y'])
+        shoulder_height = PLAYER_LEG_LENGTH + PLAYER_TORSO_HEIGHT * 0.8
+        gun_forward_offset = 0.35 * PLAYER_TOTAL_HEIGHT + PLAYER_GUN_LENGTH
+        glPopMatrix()
+        
+    for enemy in enemies: # Enemy model origin is at its feet (Y=0 locally)
+        glPushMatrix()
+        glTranslatef(enemy['pos'][0],enemy['pos'][1]-enemy['model_height']/2,enemy['pos'][2])
+        glRotatef(enemy['rotation_y'],0,1,0)
+        draw_wolf(enemy['model_height'],enemy['color'],[c*0.8 for c in enemy['color']],[c*1.1 for c in enemy['color']],[0.1,0.1,0.1]); glPopMatrix()
+    for bullet in bullets: 
+        glPushMatrix()
+        glTranslatef(bullet['pos'][0],bullet['pos'][1],bullet['pos'][2])
+        glColor3fv(bullet['color'])
+        glutSolidSphere(BULLET_RADIUS,6,6)
+        glPopMatrix()
+    if game_state==STATE_LEVEL_TRANSITION or game_state==STATE_GAME_OVER_TRANSITION:
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        gluOrtho2D(0,1,0,1)
+        glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
+        glLoadIdentity()
+        glDisable(GL_LIGHTING)
+        glDisable(GL_DEPTH_TEST)
+        glColor4f(transition_color[0],transition_color[1],transition_color[2],0.85)
+        glBegin(GL_QUADS)
+        glVertex2f(0,0)
+        glVertex2f(1,0)
+        glVertex2f(1,1)
+        glVertex2f(0,1)
+        glEnd()
+        glEnable(GL_DEPTH_TEST)
+        glEnable(GL_LIGHTING)
+        glPopMatrix()
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+        glMatrixMode(GL_MODELVIEW)
+    draw_ui()
+    glutSwapBuffers()
+
+def reshape(w,h):
+    global SCREEN_WIDTH,SCREEN_HEIGHT
+    SCREEN_WIDTH,SCREEN_HEIGHT=w,h
+    glViewport(0,0,w,h if h else 1)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(45.0,float(w)/(h if h else 1),0.1,500.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+
+def keyboard(key,x,y):
+    global camera_mode,player
+    k=key.lower()
+    keys_pressed[k]=True
+
+    if k == b' ' and player['shoot_cooldown']<=0:
+        player['shoot_cooldown'] = player['current_shoot_cooldown_time']
+        
+        # Get player's current orientation
+        yaw_rad = math.radians(player['rotation_y'])
+
+        # Get local model space forward offset to the gun base and tip
+        gun_base_offset = 0.35 * PLAYER_TOTAL_HEIGHT
+        gun_length = PLAYER_GUN_LENGTH
+        shoulder_height = PLAYER_LEG_LENGTH + PLAYER_TORSO_HEIGHT * 0.8
+        gun_y = player['pos'][1] - PLAYER_BODY_Y_OFFSET + shoulder_height
+
+        # Forward direction (player is facing)
+        dir_x = math.sin(yaw_rad)
+        dir_z = math.cos(yaw_rad)
+
+        # Gun base world position
+        gun_base_x = player['pos'][0] + dir_x * gun_base_offset
+        gun_base_z = player['pos'][2] + dir_z * gun_base_offset
+
+        # Gun tip world position
+        tip_world_x = gun_base_x + dir_x * gun_length
+        tip_world_y = gun_y
+        tip_world_z = gun_base_z + dir_z * gun_length
+
+        # Direction vector
+        direction = normalize_vector([dir_x, 0, dir_z])
+
+        create_bullet([tip_world_x, tip_world_y, tip_world_z], direction, 'PLAYER', 1)
+        mouse_buttons[GLUT_LEFT_BUTTON] = "PROCESSED"
+
+    if key==b'\x1b': 
+        glutLeaveMainLoop()
+    if k==b'f': 
+        camera_mode = 1-camera_mode # Toggle 0 and 1
+    if k==b'h' and player['health_perk_available']: 
+        player['health']=PLAYER_MAX_HEALTH
+        player['health_perk_available']=False
+        player['kills_for_health_perk']=0
+        print("Health Perk!")
+    if k==b'c' and player['score_perk_available']:
+        player['score_perk_active_until']=time.time()+PERK_SCORE_MULTIPLIER_DURATION
+        player['score_perk_available']=False
+        player['kills_for_score_perk']=0
+        print("Score Perk!")
+    if k==b'g' and player['gun_perk_available']: 
+        player['gun_perk_active_until']=time.time()+PERK_RAPID_FIRE_DURATION
+        player['gun_perk_available']=False
+        player['kills_for_gun_perk']=0
+        print("Gun Perk!")
+
+def keyboard_up(key,x,y): 
+    keys_pressed[key.lower()]=False
+def special_keys_input(key,x,y): 
+    special_keys_pressed[key]=True
+def special_keys_up(key,x,y): 
+    special_keys_pressed[key]=False
+def mouse_click(button,state,x,y): 
+    global mouse_buttons
+    mouse_buttons[button]=state # Store exact state
+    
+def idle():
+    global last_time
+    current_t=glutGet(GLUT_ELAPSED_TIME)/1000.0
+    delta_t=current_t-last_time
+    last_time=current_t
+    if delta_t > 0.1: 
+        delta_t=0.1
+    if delta_t <= 0: 
+        delta_t=1/60.0
+    update_game_state(delta_t)
+    glutPostRedisplay()
+
+def main():
+    global last_time,glu_quadric
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH|GLUT_ALPHA)
+    glutInitWindowSize(SCREEN_WIDTH,SCREEN_HEIGHT)
+    glutCreateWindow(b"OpenGL Dungeon Crawler - Wolf Refined")
+    glEnable(GL_DEPTH_TEST)
+    glShadeModel(GL_SMOOTH)
+    glClearColor(0.05,0.05,0.15,1.0)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA)
+    glu_quadric=gluNewQuadric()
+    gluQuadricNormals(glu_quadric,GLU_SMOOTH)
+    gluQuadricTexture(glu_quadric,GL_FALSE)
+    init_level_configs()
+    init_player()
+    init_level(current_level)
+    last_time=glutGet(GLUT_ELAPSED_TIME)/1000.0
+    glutDisplayFunc(display)
+    glutReshapeFunc(reshape)
+    glutKeyboardFunc(keyboard)
+    glutKeyboardUpFunc(keyboard_up)
+    glutSpecialFunc(special_keys_input)
+    glutSpecialUpFunc(special_keys_up)
+    glutMouseFunc(mouse_click)
+    glutIdleFunc(idle)
+    print("--- Game Controls ---")
+    print("W,S:Move | A,D:Rotate | MouseLeft:Shoot | Arrows:Cam | F:View | H,C,G:Perks | ESC:Exit")
+    glutMainLoop()
+
+if __name__ == "__main__": main()
